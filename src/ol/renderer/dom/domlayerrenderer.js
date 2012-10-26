@@ -78,9 +78,9 @@ ol.renderer.dom.Layer.prototype.handleLayerHueChange = function() {
 ol.renderer.dom.Layer.prototype.applyHSBCFilter_ = function() {
   var layer = this.getLayer();
 
-  var hue = (layer.getHue() % 360).toFixed(3);
+  var hue = (layer.getHue() % (2 * Math.PI)).toFixed(3);
   var hueFilter = (+hue !== 0) ?
-      'hue-rotate(' + hue + 'deg) ' : '';
+      'hue-rotate(' + hue + 'rad) ' : '';
 
   var saturation = layer.getSaturation().toFixed(3);
   var saturationFilter = (+saturation !== 1) ?
