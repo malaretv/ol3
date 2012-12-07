@@ -110,7 +110,7 @@ ol.renderer.dom.Layer.prototype.applyHSBCFilter_ = function() {
   var filter = hueFilter + saturationFilter + brightnessFilter + contrastFilter;
 
   var style = this.target.style;
-  style.WebkitFilter = filter;
+  style['WebkitFilter'] = filter;
 };
 
 
