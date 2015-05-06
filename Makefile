@@ -62,7 +62,7 @@ help:
 apidoc: build/timestamps/jsdoc-$(BRANCH)-timestamp
 
 .PHONY: build
-build: build/ol.css build/ol.js build/ol-debug.js build/ol.js.map
+build: build/ol.css build/ol.js build/ol-debug.js build/ol-act.js build/ol.js.map
 
 .PHONY: check
 check: lint build/ol.js test
@@ -94,6 +94,7 @@ clean:
 	rm -f build/ol.css
 	rm -f build/ol.js
 	rm -f build/ol.js.map
+	rm -f build/ol-act.js
 	rm -f build/ol-debug.js
 	rm -f build/test_requires.js
 	rm -f build/test_rendering_requires.js
@@ -284,6 +285,16 @@ build/ol.css: css/ol.css build/timestamps/node-modules-timestamp
 	@mkdir -p $(@D)
 	@echo "Running cleancss..."
 	@./node_modules/.bin/cleancss $< > $@
+
+build/ol-act.js: config/act.json $(SRC_JS) $(SRC_SHADER_JS) \
+								build/timestamps/node-modules-timestamp
+	@mkdir -p $(@D)
+	node tasks/build.js $< $@
+	@$(STAT_UNCOMPRESSED) $@
+	@cp $@ /tmp/
+	@gzip /tmp/ol-act.js
+	@$(STAT_COMPRESSED) /tmp/ol-act.js.gz
+	@rm /tmp/ol-act.js.gz
 
 build/ol.js: config/ol.json $(SRC_JS) $(SRC_SHADER_JS) \
              build/timestamps/node-modules-timestamp

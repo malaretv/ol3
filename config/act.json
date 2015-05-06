@@ -1,0 +1,28 @@
+{
+  "exports": [
+    "ol.Map",
+    "ol.View",
+    "ol.layer.Tile",
+    "ol.source.OSM",
+    "ol.source.ACT",
+    "ol.proj.Projection",
+    "ol.tilegrid.TileGrid"
+  ],
+  "compile": {
+    "externs": [
+      "externs/bingmaps.js",
+      "externs/closure-compiler.js",
+      "externs/geojson.js",
+      "externs/oli.js",
+      "externs/olx.js",
+      "externs/proj4js.js"
+    ],
+    "define": [
+      "ol.ENABLE_DOM=false",
+      "ol.ENABLE_WEBGL=false"
+    ],
+    "compilation_level": "ADVANCED_OPTIMIZATIONS",
+    "use_types_for_optimization": true,
+    "manage_closure_dependencies": true
+  }
+}
