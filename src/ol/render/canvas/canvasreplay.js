@@ -252,7 +252,8 @@ ol.render.canvas.Replay.prototype.replay_ = function(
       case ol.render.canvas.Instruction.BEGIN_GEOMETRY:
         feature = /** @type {ol.Feature} */ (instruction[1]);
         var featureUid = goog.getUid(feature).toString();
-        if (goog.isDef(skippedFeaturesHash[featureUid])) {
+        if (goog.isDef(skippedFeaturesHash[featureUid]) ||
+            !goog.isDefAndNotNull(feature.getGeometry())) {
           i = /** @type {number} */ (instruction[2]);
         } else if (goog.isDef(opt_hitExtent) && !ol.extent.intersects(
             opt_hitExtent, feature.getGeometry().getExtent())) {
@@ -353,7 +354,7 @@ ol.render.canvas.Replay.prototype.replay_ = function(
             '3rd instruction should be a number');
         dd = /** @type {number} */ (instruction[2]);
         goog.asserts.assert(goog.isString(instruction[3]),
-            '4th instruction should be a number');
+            '4th instruction should be a string');
         text = /** @type {string} */ (instruction[3]);
         goog.asserts.assert(goog.isNumber(instruction[4]),
             '5th instruction should be a number');

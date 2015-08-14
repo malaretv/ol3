@@ -2,7 +2,6 @@ goog.provide('ol.layer.Base');
 goog.provide('ol.layer.LayerProperty');
 goog.provide('ol.layer.LayerState');
 
-goog.require('goog.events');
 goog.require('goog.math');
 goog.require('goog.object');
 goog.require('ol.Object');
@@ -35,6 +34,7 @@ ol.layer.LayerProperty = {
  *            saturation: number,
  *            sourceState: ol.source.State,
  *            visible: boolean,
+ *            managed: boolean,
  *            extent: (ol.Extent|undefined),
  *            maxResolution: number,
  *            minResolution: number}}
@@ -142,6 +142,7 @@ ol.layer.Base.prototype.getLayerState = function() {
     saturation: Math.max(saturation, 0),
     sourceState: sourceState,
     visible: visible,
+    managed: true,
     extent: extent,
     maxResolution: maxResolution,
     minResolution: Math.max(minResolution, 0)

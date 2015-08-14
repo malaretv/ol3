@@ -12,7 +12,6 @@ goog.require('ol.proj');
 goog.require('ol.source.State');
 goog.require('ol.source.TileImage');
 goog.require('ol.tilecoord');
-goog.require('ol.tilegrid.XYZ');
 
 
 
@@ -103,44 +102,47 @@ ol.source.BingMaps.prototype.handleImageryMetadataResponse =
   var maxZoom = this.maxZoom_ == -1 ? resource.zoomMax : this.maxZoom_;
 
   var sourceProjection = this.getProjection();
-  var tileGrid = new ol.tilegrid.XYZ({
-    extent: ol.tilegrid.extentFromProjection(sourceProjection),
+  var extent = ol.tilegrid.extentFromProjection(sourceProjection);
+  var tileSize = resource.imageWidth == resource.imageHeight ?
+      resource.imageWidth : [resource.imageWidth, resource.imageHeight];
+  var tileGrid = ol.tilegrid.createXYZ({
+    extent: extent,
     minZoom: resource.zoomMin,
     maxZoom: maxZoom,
-    tileSize: resource.imageWidth == resource.imageHeight ?
-        resource.imageWidth : [resource.imageWidth, resource.imageHeight]
+    tileSize: tileSize
   });
   this.tileGrid = tileGrid;
 
   var culture = this.culture_;
-  this.tileUrlFunction = ol.TileUrlFunction.withTileCoordTransform(
-      tileGrid.createTileCoordTransform(),
-      ol.TileUrlFunction.createFromTileUrlFunctions(
-          goog.array.map(
-              resource.imageUrlSubdomains,
-              function(subdomain) {
-                var imageUrl = resource.imageUrl
-                    .replace('{subdomain}', subdomain)
-                    .replace('{culture}', culture);
-                return (
-                    /**
-                     * @param {ol.TileCoord} tileCoord Tile coordinate.
-                     * @param {number} pixelRatio Pixel ratio.
-                     * @param {ol.proj.Projection} projection Projection.
-                     * @return {string|undefined} Tile URL.
-                     */
-                    function(tileCoord, pixelRatio, projection) {
-                      goog.asserts.assert(ol.proj.equivalent(
-                          projection, sourceProjection),
-                          'projections are equivalent');
-                      if (goog.isNull(tileCoord)) {
-                        return undefined;
-                      } else {
-                        return imageUrl.replace(
-                            '{quadkey}', ol.tilecoord.quadKey(tileCoord));
-                      }
-                    });
-              })));
+  this.tileUrlFunction = ol.TileUrlFunction.createFromTileUrlFunctions(
+      goog.array.map(
+          resource.imageUrlSubdomains,
+          function(subdomain) {
+            var quadKeyTileCoord = [0, 0, 0];
+            var imageUrl = resource.imageUrl
+                .replace('{subdomain}', subdomain)
+                .replace('{culture}', culture);
+            return (
+                /**
+                 * @param {ol.TileCoord} tileCoord Tile coordinate.
+                 * @param {number} pixelRatio Pixel ratio.
+                 * @param {ol.proj.Projection} projection Projection.
+                 * @return {string|undefined} Tile URL.
+                 */
+                function(tileCoord, pixelRatio, projection) {
+                  goog.asserts.assert(ol.proj.equivalent(
+                      projection, sourceProjection),
+                      'projections are equivalent');
+                  if (goog.isNull(tileCoord)) {
+                    return undefined;
+                  } else {
+                    ol.tilecoord.createOrUpdate(tileCoord[0], tileCoord[1],
+                        -tileCoord[2] - 1, quadKeyTileCoord);
+                    return imageUrl.replace('{quadkey}', ol.tilecoord.quadKey(
+                        quadKeyTileCoord));
+                  }
+                });
+          }));
 
   if (resource.imageryProviders) {
     var transform = ol.proj.getTransformFromProjections(

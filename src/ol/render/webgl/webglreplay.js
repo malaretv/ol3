@@ -1,7 +1,6 @@
 goog.provide('ol.render.webgl.ImageReplay');
 goog.provide('ol.render.webgl.ReplayGroup');
 
-goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.functions');
 goog.require('goog.object');
@@ -854,6 +853,7 @@ ol.render.webgl.ImageReplay.prototype.drawHitDetectionReplayOneByOne_ =
       featureUid = goog.getUid(feature).toString();
 
       if (!goog.isDef(skippedFeaturesHash[featureUid]) &&
+          goog.isDefAndNotNull(feature.getGeometry()) &&
           (!goog.isDef(opt_hitExtent) || ol.extent.intersects(
               opt_hitExtent, feature.getGeometry().getExtent()))) {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

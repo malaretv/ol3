@@ -1,8 +1,13 @@
+language: python
+sudo: false
+cache:
+  directories:
+    - node_modules
 env:
   - DISPLAY=:99.0
 
 before_install:
-  - "sudo pip install -r requirements.txt"
+  - "pip install -r requirements.txt"
   - "npm install -g npm && npm install"
 
 before_script:
@@ -14,3 +19,7 @@ script: "make ci"
 after_success:
   - "make test-coverage"
   - "cat coverage/lcov.info | ./node_modules/.bin/coveralls"
+
+branches:
+  only:
+    - master
