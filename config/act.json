@@ -6,7 +6,14 @@
     "ol.source.OSM",
     "ol.source.ACT",
     "ol.proj.Projection",
-    "ol.tilegrid.TileGrid"
+    "ol.tilegrid.TileGrid",
+    "ol.Map#*",
+    "ol.View#*",
+    "ol.layer.Tile#*",
+    "ol.source.OSM#*",
+    "ol.source.ACT#*",
+    "ol.proj.Projection#*",
+    "ol.tilegrid.TileGrid#*"
   ],
   "compile": {
     "externs": [
