@@ -1,6 +1,5 @@
 goog.provide('ol.renderer.webgl.VectorLayer');
 
-goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.events');
 goog.require('ol.ViewHint');
@@ -78,12 +77,10 @@ ol.renderer.webgl.VectorLayer.prototype.composeFrame =
   this.layerState_ = layerState;
   var viewState = frameState.viewState;
   var replayGroup = this.replayGroup_;
-  if (!goog.isNull(replayGroup) && !replayGroup.isEmpty()) {
+  if (replayGroup && !replayGroup.isEmpty()) {
     replayGroup.replay(context,
         viewState.center, viewState.resolution, viewState.rotation,
         frameState.size, frameState.pixelRatio, layerState.opacity,
-        layerState.brightness, layerState.contrast, layerState.hue,
-        layerState.saturation,
         layerState.managed ? frameState.skippedFeatureUids : {});
   }
 
@@ -95,7 +92,7 @@ ol.renderer.webgl.VectorLayer.prototype.composeFrame =
  */
 ol.renderer.webgl.VectorLayer.prototype.disposeInternal = function() {
   var replayGroup = this.replayGroup_;
-  if (!goog.isNull(replayGroup)) {
+  if (replayGroup) {
     var context = this.mapRenderer.getContext();
     replayGroup.getDeleteResourcesFunction(context)();
     this.replayGroup_ = null;
@@ -109,7 +106,7 @@ ol.renderer.webgl.VectorLayer.prototype.disposeInternal = function() {
  */
 ol.renderer.webgl.VectorLayer.prototype.forEachFeatureAtCoordinate =
     function(coordinate, frameState, callback, thisArg) {
-  if (goog.isNull(this.replayGroup_) || goog.isNull(this.layerState_)) {
+  if (!this.replayGroup_ || !this.layerState_) {
     return undefined;
   } else {
     var context = this.mapRenderer.getContext();
@@ -120,16 +117,14 @@ ol.renderer.webgl.VectorLayer.prototype.forEachFeatureAtCoordinate =
     var features = {};
     return this.replayGroup_.forEachFeatureAtCoordinate(coordinate,
         context, viewState.center, viewState.resolution, viewState.rotation,
-        frameState.size, frameState.pixelRatio,
-        layerState.opacity, layerState.brightness, layerState.contrast,
-        layerState.hue, layerState.saturation,
+        frameState.size, frameState.pixelRatio, layerState.opacity,
         layerState.managed ? frameState.skippedFeatureUids : {},
         /**
          * @param {ol.Feature} feature Feature.
          * @return {?} Callback result.
          */
         function(feature) {
-          goog.asserts.assert(goog.isDef(feature), 'received a feature');
+          goog.asserts.assert(feature !== undefined, 'received a feature');
           var key = goog.getUid(feature).toString();
           if (!(key in features)) {
             features[key] = true;
@@ -145,7 +140,7 @@ ol.renderer.webgl.VectorLayer.prototype.forEachFeatureAtCoordinate =
  */
 ol.renderer.webgl.VectorLayer.prototype.hasFeatureAtCoordinate =
     function(coordinate, frameState) {
-  if (goog.isNull(this.replayGroup_) || goog.isNull(this.layerState_)) {
+  if (!this.replayGroup_ || !this.layerState_) {
     return false;
   } else {
     var context = this.mapRenderer.getContext();
@@ -153,9 +148,8 @@ ol.renderer.webgl.VectorLayer.prototype.hasFeatureAtCoordinate =
     var layerState = this.layerState_;
     return this.replayGroup_.hasFeatureAtCoordinate(coordinate,
         context, viewState.center, viewState.resolution, viewState.rotation,
-        frameState.size, frameState.pixelRatio,
-        layerState.opacity, layerState.brightness, layerState.contrast,
-        layerState.hue, layerState.saturation, frameState.skippedFeatureUids);
+        frameState.size, frameState.pixelRatio, layerState.opacity,
+        frameState.skippedFeatureUids);
   }
 };
 
@@ -223,7 +217,7 @@ ol.renderer.webgl.VectorLayer.prototype.prepareFrame =
   var vectorLayerRenderBuffer = vectorLayer.getRenderBuffer();
   var vectorLayerRenderOrder = vectorLayer.getRenderOrder();
 
-  if (!goog.isDef(vectorLayerRenderOrder)) {
+  if (vectorLayerRenderOrder === undefined) {
     vectorLayerRenderOrder = ol.renderer.vector.defaultOrder;
   }
 
@@ -238,7 +232,7 @@ ol.renderer.webgl.VectorLayer.prototype.prepareFrame =
     return true;
   }
 
-  if (!goog.isNull(this.replayGroup_)) {
+  if (this.replayGroup_) {
     frameState.postRenderFunctions.push(
         this.replayGroup_.getDeleteResourcesFunction(context));
   }
@@ -256,32 +250,35 @@ ol.renderer.webgl.VectorLayer.prototype.prepareFrame =
        */
       function(feature) {
     var styles;
-    if (goog.isDef(feature.getStyleFunction())) {
-      styles = feature.getStyleFunction().call(feature, resolution);
-    } else if (goog.isDef(vectorLayer.getStyleFunction())) {
-      styles = vectorLayer.getStyleFunction()(feature, resolution);
+    var styleFunction = feature.getStyleFunction();
+    if (styleFunction) {
+      styles = styleFunction.call(feature, resolution);
+    } else {
+      styleFunction = vectorLayer.getStyleFunction();
+      if (styleFunction) {
+        styles = styleFunction(feature, resolution);
+      }
     }
-    if (goog.isDefAndNotNull(styles)) {
+    if (styles) {
       var dirty = this.renderFeature(
           feature, resolution, pixelRatio, styles, replayGroup);
       this.dirty_ = this.dirty_ || dirty;
     }
   };
-  if (!goog.isNull(vectorLayerRenderOrder)) {
+  if (vectorLayerRenderOrder) {
     /** @type {Array.<ol.Feature>} */
     var features = [];
-    vectorSource.forEachFeatureInExtentAtResolution(extent, resolution,
+    vectorSource.forEachFeatureInExtent(extent,
         /**
          * @param {ol.Feature} feature Feature.
          */
         function(feature) {
           features.push(feature);
         }, this);
-    goog.array.sort(features, vectorLayerRenderOrder);
-    goog.array.forEach(features, renderFeature, this);
+    features.sort(vectorLayerRenderOrder);
+    features.forEach(renderFeature, this);
   } else {
-    vectorSource.forEachFeatureInExtentAtResolution(
-        extent, resolution, renderFeature, this);
+    vectorSource.forEachFeatureInExtent(extent, renderFeature, this);
   }
   replayGroup.finish(context);
 
@@ -299,19 +296,27 @@ ol.renderer.webgl.VectorLayer.prototype.prepareFrame =
  * @param {ol.Feature} feature Feature.
  * @param {number} resolution Resolution.
  * @param {number} pixelRatio Pixel ratio.
- * @param {Array.<ol.style.Style>} styles Array of styles
+ * @param {(ol.style.Style|Array.<ol.style.Style>)} styles The style or array of
+ *     styles.
  * @param {ol.render.webgl.ReplayGroup} replayGroup Replay group.
  * @return {boolean} `true` if an image is loading.
  */
 ol.renderer.webgl.VectorLayer.prototype.renderFeature =
     function(feature, resolution, pixelRatio, styles, replayGroup) {
-  if (!goog.isDefAndNotNull(styles)) {
+  if (!styles) {
     return false;
   }
-  var i, ii, loading = false;
-  for (i = 0, ii = styles.length; i < ii; ++i) {
+  var loading = false;
+  if (goog.isArray(styles)) {
+    for (var i = 0, ii = styles.length; i < ii; ++i) {
+      loading = ol.renderer.vector.renderFeature(
+          replayGroup, feature, styles[i],
+          ol.renderer.vector.getSquaredTolerance(resolution, pixelRatio),
+          this.handleStyleImageChange_, this) || loading;
+    }
+  } else {
     loading = ol.renderer.vector.renderFeature(
-        replayGroup, feature, styles[i],
+        replayGroup, feature, styles,
         ol.renderer.vector.getSquaredTolerance(resolution, pixelRatio),
         this.handleStyleImageChange_, this) || loading;
   }

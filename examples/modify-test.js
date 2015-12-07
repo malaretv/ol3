@@ -13,15 +13,14 @@ goog.require('ol.style.Style');
 
 
 var styleFunction = (function() {
-  /* jshint -W069 */
   var styles = {};
   var image = new ol.style.Circle({
     radius: 5,
     fill: null,
     stroke: new ol.style.Stroke({color: 'orange', width: 2})
   });
-  styles['Point'] = [new ol.style.Style({image: image})];
-  styles['Polygon'] = [new ol.style.Style({
+  styles['Point'] = new ol.style.Style({image: image});
+  styles['Polygon'] = new ol.style.Style({
     stroke: new ol.style.Stroke({
       color: 'blue',
       width: 3
@@ -29,14 +28,14 @@ var styleFunction = (function() {
     fill: new ol.style.Fill({
       color: 'rgba(0, 0, 255, 0.1)'
     })
-  })];
-  styles['MultiLinestring'] = [new ol.style.Style({
+  });
+  styles['MultiLinestring'] = new ol.style.Style({
     stroke: new ol.style.Stroke({
       color: 'green',
       width: 3
     })
-  })];
-  styles['MultiPolygon'] = [new ol.style.Style({
+  });
+  styles['MultiPolygon'] = new ol.style.Style({
     stroke: new ol.style.Stroke({
       color: 'yellow',
       width: 1
@@ -44,8 +43,8 @@ var styleFunction = (function() {
     fill: new ol.style.Fill({
       color: 'rgba(255, 255, 0, 0.1)'
     })
-  })];
-  styles['default'] = [new ol.style.Style({
+  });
+  styles['default'] = new ol.style.Style({
     stroke: new ol.style.Stroke({
       color: 'red',
       width: 3
@@ -54,11 +53,10 @@ var styleFunction = (function() {
       color: 'rgba(255, 0, 0, 0.1)'
     }),
     image: image
-  })];
+  });
   return function(feature, resolution) {
     return styles[feature.getGeometry().getType()] || styles['default'];
   };
-  /* jshint +W069 */
 })();
 
 var geojsonObject = {
@@ -169,7 +167,6 @@ var layer = new ol.layer.Vector({
 });
 
 var overlayStyle = (function() {
-  /* jshint -W069 */
   var styles = {};
   styles['Polygon'] = [
     new ol.style.Style({
@@ -230,7 +227,6 @@ var overlayStyle = (function() {
   return function(feature, resolution) {
     return styles[feature.getGeometry().getType()];
   };
-  /* jshint +W069 */
 })();
 
 var select = new ol.interaction.Select({

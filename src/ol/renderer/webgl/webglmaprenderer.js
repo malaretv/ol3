@@ -2,9 +2,9 @@
 
 goog.provide('ol.renderer.webgl.Map');
 
+goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.dom');
-goog.require('goog.dom.TagName');
 goog.require('goog.events');
 goog.require('goog.events.Event');
 goog.require('goog.log');
@@ -58,7 +58,7 @@ ol.renderer.webgl.Map = function(container, map) {
    * @type {HTMLCanvasElement}
    */
   this.canvas_ = /** @type {HTMLCanvasElement} */
-      (goog.dom.createElement(goog.dom.TagName.CANVAS));
+      (document.createElement('CANVAS'));
   this.canvas_.style.width = '100%';
   this.canvas_.style.height = '100%';
   this.canvas_.className = ol.css.CLASS_UNSELECTABLE;
@@ -99,7 +99,7 @@ ol.renderer.webgl.Map = function(container, map) {
     preserveDrawingBuffer: false,
     stencil: true
   });
-  goog.asserts.assert(!goog.isNull(this.gl_), 'got a WebGLRenderingContext');
+  goog.asserts.assert(this.gl_, 'got a WebGLRenderingContext');
 
   /**
    * @private
@@ -193,7 +193,7 @@ ol.renderer.webgl.Map.prototype.bindTileTexture =
   var tileKey = tile.getKey();
   if (this.textureCache_.containsKey(tileKey)) {
     var textureCacheEntry = this.textureCache_.get(tileKey);
-    goog.asserts.assert(!goog.isNull(textureCacheEntry),
+    goog.asserts.assert(textureCacheEntry,
         'a texture cache entry exists for key %s', tileKey);
     gl.bindTexture(goog.webgl.TEXTURE_2D, textureCacheEntry.texture);
     if (textureCacheEntry.magFilter != magFilter) {
@@ -308,7 +308,7 @@ ol.renderer.webgl.Map.prototype.disposeInternal = function() {
          *     Texture cache entry.
          */
         function(textureCacheEntry) {
-          if (!goog.isNull(textureCacheEntry)) {
+          if (textureCacheEntry) {
             gl.deleteTexture(textureCacheEntry.texture);
           }
         });
@@ -329,7 +329,7 @@ ol.renderer.webgl.Map.prototype.expireCache_ = function(map, frameState) {
   while (this.textureCache_.getCount() - this.textureCacheFrameMarkerCount_ >
       ol.WEBGL_TEXTURE_CACHE_HIGH_WATER_MARK) {
     textureCacheEntry = this.textureCache_.peekLast();
-    if (goog.isNull(textureCacheEntry)) {
+    if (!textureCacheEntry) {
       if (+this.textureCache_.peekLastKey() == frameState.index) {
         break;
       } else {
@@ -392,9 +392,7 @@ ol.renderer.webgl.Map.prototype.handleWebGLContextLost = function(event) {
       function(layerRenderer, key, object) {
         goog.asserts.assertInstanceof(layerRenderer, ol.renderer.webgl.Layer,
             'renderer is an instance of ol.renderer.webgl.Layer');
-        var webGLLayerRenderer = /** @type {ol.renderer.webgl.Layer} */
-            (layerRenderer);
-        webGLLayerRenderer.handleWebGLContextLost();
+        layerRenderer.handleWebGLContextLost();
       });
 };
 
@@ -453,7 +451,7 @@ ol.renderer.webgl.Map.prototype.renderFrame = function(frameState) {
     return false;
   }
 
-  if (goog.isNull(frameState)) {
+  if (!frameState) {
     if (this.renderedVisible_) {
       goog.style.setElementShown(this.canvas_, false);
       this.renderedVisible_ = false;
@@ -471,6 +469,8 @@ ol.renderer.webgl.Map.prototype.renderFrame = function(frameState) {
   /** @type {Array.<ol.layer.LayerState>} */
   var layerStatesToDraw = [];
   var layerStatesArray = frameState.layerStatesArray;
+  goog.array.stableSort(layerStatesArray, ol.renderer.Map.sortByZIndex);
+
   var viewResolution = frameState.viewState.resolution;
   var i, ii, layerRenderer, layerState;
   for (i = 0, ii = layerStatesArray.length; i < ii; ++i) {
@@ -630,17 +630,4 @@ ol.renderer.webgl.Map.prototype.forEachLayerAtPixel =
     }
   }
   return undefined;
-};
-
-
-/**
- * @private
- * @const
- */
-ol.renderer.webgl.Map.DEFAULT_COLOR_VALUES_ = {
-  opacity: 1,
-  brightness: 0,
-  contrast: 1,
-  hue: 0,
-  saturation: 1
 };

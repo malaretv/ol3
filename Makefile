@@ -19,7 +19,7 @@ BUILD_HOSTED := build/hosted/$(BRANCH)
 BUILD_HOSTED_EXAMPLES := $(addprefix $(BUILD_HOSTED)/,$(EXAMPLES))
 BUILD_HOSTED_EXAMPLES_JS := $(addprefix $(BUILD_HOSTED)/,$(EXAMPLES_JS))
 
-UNPHANTOMABLE_EXAMPLES = examples/shaded-relief.html examples/raster.html examples/region-growing.html
+UNPHANTOMABLE_EXAMPLES = examples/shaded-relief.html examples/raster.html examples/region-growing.html examples/color-manipulation.html
 CHECK_EXAMPLE_TIMESTAMPS = $(patsubst examples/%.html,build/timestamps/check-%-timestamp,$(filter-out $(UNPHANTOMABLE_EXAMPLES),$(EXAMPLES_HTML)))
 
 TASKS_JS := $(shell find tasks -name '*.js')
@@ -334,5 +334,5 @@ build/test_rendering_requires.js: $(SPEC_RENDERING_JS)
 	@mkdir -p $(@D)
 	@node tasks/generate-requires.js $^ > $@
 
-%shader.js: %.glsl src/ol/webgl/shader.mustache bin/pyglslunit.py
-	@python bin/pyglslunit.py --input $< --template src/ol/webgl/shader.mustache --output $@
+%shader.js: %.glsl src/ol/webgl/shader.mustache bin/pyglslunit.py build/timestamps/node-modules-timestamp
+	@python bin/pyglslunit.py --input $< | ./node_modules/.bin/mustache - src/ol/webgl/shader.mustache > $@

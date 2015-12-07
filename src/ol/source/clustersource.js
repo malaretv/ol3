@@ -3,7 +3,6 @@
 
 goog.provide('ol.source.Cluster');
 
-goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.events.EventType');
 goog.require('goog.object');
@@ -29,7 +28,8 @@ ol.source.Cluster = function(options) {
     attributions: options.attributions,
     extent: options.extent,
     logo: options.logo,
-    projection: options.projection
+    projection: options.projection,
+    wrapX: options.wrapX
   });
 
   /**
@@ -42,7 +42,7 @@ ol.source.Cluster = function(options) {
    * @type {number}
    * @private
    */
-  this.distance_ = goog.isDef(options.distance) ? options.distance : 20;
+  this.distance_ = options.distance !== undefined ? options.distance : 20;
 
   /**
    * @type {Array.<ol.Feature>}
@@ -77,10 +77,10 @@ ol.source.Cluster.prototype.getSource = function() {
  */
 ol.source.Cluster.prototype.loadFeatures = function(extent, resolution,
     projection) {
+  this.source_.loadFeatures(extent, resolution, projection);
   if (resolution !== this.resolution_) {
     this.clear();
     this.resolution_ = resolution;
-    this.source_.loadFeatures(extent, resolution, projection);
     this.cluster_();
     this.addFeatures(this.features_);
   }
@@ -103,7 +103,7 @@ ol.source.Cluster.prototype.onSourceChange_ = function() {
  * @private
  */
 ol.source.Cluster.prototype.cluster_ = function() {
-  if (!goog.isDef(this.resolution_)) {
+  if (this.resolution_ === undefined) {
     return;
   }
   this.features_.length = 0;
@@ -118,7 +118,7 @@ ol.source.Cluster.prototype.cluster_ = function() {
 
   for (var i = 0, ii = features.length; i < ii; i++) {
     var feature = features[i];
-    if (!goog.object.containsKey(clustered, goog.getUid(feature).toString())) {
+    if (!(goog.getUid(feature).toString() in clustered)) {
       var geometry = feature.getGeometry();
       goog.asserts.assert(geometry instanceof ol.geom.Point,
           'feature geometry is a ol.geom.Point instance');
@@ -128,9 +128,9 @@ ol.source.Cluster.prototype.cluster_ = function() {
 
       var neighbors = this.source_.getFeaturesInExtent(extent);
       goog.asserts.assert(neighbors.length >= 1, 'at least one neighbor found');
-      neighbors = goog.array.filter(neighbors, function(neighbor) {
+      neighbors = neighbors.filter(function(neighbor) {
         var uid = goog.getUid(neighbor).toString();
-        if (!goog.object.containsKey(clustered, uid)) {
+        if (!(uid in clustered)) {
           clustered[uid] = true;
           return true;
         } else {

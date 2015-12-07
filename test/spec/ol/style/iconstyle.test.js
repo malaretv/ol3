@@ -9,6 +9,20 @@ goog.require('ol.style.IconOrigin');
 describe('ol.style.Icon', function() {
   var size = [36, 48];
 
+  describe('constructor', function() {
+
+    it('caches canvas images with a uid as src', function() {
+      var canvas = document.createElement('canvas');
+      new ol.style.Icon({
+        img: canvas,
+        imgSize: size
+      });
+      expect(ol.style.IconImage_.get(
+          canvas, goog.getUid(canvas), size, '').getImage()).to.eql(canvas);
+    });
+
+  });
+
   describe('#getAnchor', function() {
     var fractionAnchor = [0.25, 0.25];
 
@@ -181,14 +195,14 @@ describe('ol.style.IconImageCache', function() {
       src = '0';
       iconImage = new ol.style.IconImage_(src, null);
       goog.events.listen(iconImage, goog.events.EventType.CHANGE,
-          goog.nullFunction, false);
+          ol.nullFunction, false);
       cache.set(src, null, iconImage);
       expect(cache.cacheSize_).to.eql(4);
 
       src = '4';
       iconImage = new ol.style.IconImage_(src, null);
       goog.events.listen(iconImage, goog.events.EventType.CHANGE,
-          goog.nullFunction, false);
+          ol.nullFunction, false);
       cache.set(src, null, iconImage);
       expect(cache.cacheSize_).to.eql(5);
 

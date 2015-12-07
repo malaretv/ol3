@@ -30,7 +30,6 @@
 
 goog.provide('ol.pointer.PointerEventHandler');
 
-goog.require('goog.array');
 goog.require('goog.dom');
 goog.require('goog.events');
 goog.require('goog.events.BrowserEvent');
@@ -62,7 +61,7 @@ ol.pointer.PointerEventHandler = function(element) {
 
   /**
    * @const
-   * @type {Object.<string, goog.events.BrowserEvent|Object>}
+   * @type {!Object.<string, goog.events.BrowserEvent|Object>}
    */
   this.pointerMap = {};
 
@@ -119,7 +118,7 @@ ol.pointer.PointerEventHandler.prototype.registerSource =
   var newEvents = s.getEvents();
 
   if (newEvents) {
-    goog.array.forEach(newEvents, function(e) {
+    newEvents.forEach(function(e) {
       var handler = s.getHandlerForEvent(e);
 
       if (handler) {
@@ -179,7 +178,7 @@ ol.pointer.PointerEventHandler.prototype.eventHandler_ = function(inEvent) {
  * @param {Array.<string>} events List of events.
  */
 ol.pointer.PointerEventHandler.prototype.addEvents_ = function(events) {
-  goog.array.forEach(events, function(eventName) {
+  events.forEach(function(eventName) {
     goog.events.listen(this.element_, eventName,
         this.eventHandler_, false, this);
   }, this);
@@ -192,7 +191,7 @@ ol.pointer.PointerEventHandler.prototype.addEvents_ = function(events) {
  * @param {Array.<string>} events List of events.
  */
 ol.pointer.PointerEventHandler.prototype.removeEvents_ = function(events) {
-  goog.array.forEach(events, function(e) {
+  events.forEach(function(e) {
     goog.events.unlisten(this.element_, e,
         this.eventHandler_, false, this);
   }, this);
@@ -229,7 +228,7 @@ ol.pointer.PointerEventHandler.prototype.cloneEvent =
 /**
  * Triggers a 'pointerdown' event.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  */
 ol.pointer.PointerEventHandler.prototype.down =
     function(pointerEventData, browserEvent) {
@@ -241,7 +240,7 @@ ol.pointer.PointerEventHandler.prototype.down =
 /**
  * Triggers a 'pointermove' event.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  */
 ol.pointer.PointerEventHandler.prototype.move =
     function(pointerEventData, browserEvent) {
@@ -253,7 +252,7 @@ ol.pointer.PointerEventHandler.prototype.move =
 /**
  * Triggers a 'pointerup' event.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  */
 ol.pointer.PointerEventHandler.prototype.up =
     function(pointerEventData, browserEvent) {
@@ -265,7 +264,7 @@ ol.pointer.PointerEventHandler.prototype.up =
 /**
  * Triggers a 'pointerenter' event.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  */
 ol.pointer.PointerEventHandler.prototype.enter =
     function(pointerEventData, browserEvent) {
@@ -278,7 +277,7 @@ ol.pointer.PointerEventHandler.prototype.enter =
 /**
  * Triggers a 'pointerleave' event.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  */
 ol.pointer.PointerEventHandler.prototype.leave =
     function(pointerEventData, browserEvent) {
@@ -291,7 +290,7 @@ ol.pointer.PointerEventHandler.prototype.leave =
 /**
  * Triggers a 'pointerover' event.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  */
 ol.pointer.PointerEventHandler.prototype.over =
     function(pointerEventData, browserEvent) {
@@ -304,7 +303,7 @@ ol.pointer.PointerEventHandler.prototype.over =
 /**
  * Triggers a 'pointerout' event.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  */
 ol.pointer.PointerEventHandler.prototype.out =
     function(pointerEventData, browserEvent) {
@@ -317,7 +316,7 @@ ol.pointer.PointerEventHandler.prototype.out =
 /**
  * Triggers a 'pointercancel' event.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  */
 ol.pointer.PointerEventHandler.prototype.cancel =
     function(pointerEventData, browserEvent) {
@@ -329,7 +328,7 @@ ol.pointer.PointerEventHandler.prototype.cancel =
 /**
  * Triggers a combination of 'pointerout' and 'pointerleave' events.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  */
 ol.pointer.PointerEventHandler.prototype.leaveOut =
     function(pointerEventData, browserEvent) {
@@ -345,7 +344,7 @@ ol.pointer.PointerEventHandler.prototype.leaveOut =
 /**
  * Triggers a combination of 'pointerover' and 'pointerevents' events.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  */
 ol.pointer.PointerEventHandler.prototype.enterOver =
     function(pointerEventData, browserEvent) {
@@ -367,7 +366,7 @@ ol.pointer.PointerEventHandler.prototype.enterOver =
  */
 ol.pointer.PointerEventHandler.prototype.contains_ =
     function(container, contained) {
-  if (goog.isNull(contained)) {
+  if (!contained) {
     return false;
   }
   return goog.dom.contains(container, contained);
@@ -381,7 +380,7 @@ ol.pointer.PointerEventHandler.prototype.contains_ =
  *
  * @param {string} inType A string representing the type of event to create.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  * @return {ol.pointer.PointerEvent} A PointerEvent of type `inType`.
  */
 ol.pointer.PointerEventHandler.prototype.makeEvent =
@@ -394,7 +393,7 @@ ol.pointer.PointerEventHandler.prototype.makeEvent =
  * Make and dispatch an event in one call.
  * @param {string} inType A string representing the type of event.
  * @param {Object} pointerEventData
- * @param {goog.events.BrowserEvent } browserEvent
+ * @param {goog.events.BrowserEvent} browserEvent
  */
 ol.pointer.PointerEventHandler.prototype.fireEvent =
     function(inType, pointerEventData, browserEvent) {
