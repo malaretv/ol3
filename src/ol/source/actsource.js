@@ -5,10 +5,8 @@
 goog.provide('ol.source.ACT');
 
 goog.require('goog.array');
-goog.require('goog.asserts');
 goog.require('goog.math');
 goog.require('goog.object');
-goog.require('goog.string');
 goog.require('goog.uri.utils');
 goog.require('ol');
 goog.require('ol.TileCoord');
@@ -269,5 +267,3 @@ ol.source.ACT.prototype.updateParams = function(params) {
   goog.object.extend(this.params_, params);
   this.changed();
 };
-
-
