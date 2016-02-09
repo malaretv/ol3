@@ -8,7 +8,6 @@ goog.require('ol.interaction.Interaction');
 goog.require('ol.interaction.Pointer');
 
 
-
 /**
  * @classdesc
  * Allows the user to rotate the map by clicking and dragging on the map,
@@ -113,8 +112,8 @@ ol.interaction.DragRotate.handleDownEvent_ = function(mapBrowserEvent) {
     return false;
   }
 
-  var browserEvent = mapBrowserEvent.browserEvent;
-  if (browserEvent.isMouseActionButton() && this.condition_(mapBrowserEvent)) {
+  if (ol.events.condition.mouseActionButton(mapBrowserEvent) &&
+      this.condition_(mapBrowserEvent)) {
     var map = mapBrowserEvent.map;
     map.getView().setHint(ol.ViewHint.INTERACTING, 1);
     map.render();

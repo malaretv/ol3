@@ -2,17 +2,16 @@ goog.provide('ol.source.TileArcGISRest');
 
 goog.require('goog.asserts');
 goog.require('goog.math');
-goog.require('goog.object');
 goog.require('goog.string');
 goog.require('goog.uri.utils');
 goog.require('ol');
 goog.require('ol.TileCoord');
 goog.require('ol.extent');
+goog.require('ol.object');
 goog.require('ol.proj');
 goog.require('ol.size');
 goog.require('ol.source.TileImage');
 goog.require('ol.tilecoord');
-
 
 
 /**
@@ -33,8 +32,6 @@ ol.source.TileArcGISRest = function(opt_options) {
 
   var options = opt_options || {};
 
-  var params = options.params !== undefined ? options.params : {};
-
   goog.base(this, {
     attributions: options.attributions,
     crossOrigin: options.crossOrigin,
@@ -43,7 +40,6 @@ ol.source.TileArcGISRest = function(opt_options) {
     reprojectionErrorThreshold: options.reprojectionErrorThreshold,
     tileGrid: options.tileGrid,
     tileLoadFunction: options.tileLoadFunction,
-    tileUrlFunction: goog.bind(this.tileUrlFunction_, this),
     url: options.url,
     urls: options.urls,
     wrapX: options.wrapX !== undefined ? options.wrapX : true
@@ -51,9 +47,9 @@ ol.source.TileArcGISRest = function(opt_options) {
 
   /**
    * @private
-   * @type {Object}
+   * @type {!Object}
    */
-  this.params_ = params;
+  this.params_ = options.params || {};
 
   /**
    * @private
@@ -86,8 +82,7 @@ ol.source.TileArcGISRest.prototype.getParams = function() {
  * @return {string|undefined} Request URL.
  * @private
  */
-ol.source.TileArcGISRest.prototype.getRequestUrl_ =
-    function(tileCoord, tileSize, tileExtent,
+ol.source.TileArcGISRest.prototype.getRequestUrl_ = function(tileCoord, tileSize, tileExtent,
         pixelRatio, projection, params) {
 
   var urls = this.urls;
@@ -102,7 +97,9 @@ ol.source.TileArcGISRest.prototype.getRequestUrl_ =
   params['BBOX'] = tileExtent.join(',');
   params['BBOXSR'] = srid;
   params['IMAGESR'] = srid;
-  params['DPI'] = Math.round(90 * pixelRatio);
+  params['DPI'] = Math.round(
+      params['DPI'] ? params['DPI'] * pixelRatio : 90 * pixelRatio
+      );
 
   var url;
   if (urls.length == 1) {
@@ -119,11 +116,9 @@ ol.source.TileArcGISRest.prototype.getRequestUrl_ =
   // If a MapServer, use export. If an ImageServer, use exportImage.
   if (goog.string.endsWith(url, 'MapServer/')) {
     url = url + 'export';
-  }
-  else if (goog.string.endsWith(url, 'ImageServer/')) {
+  } else if (goog.string.endsWith(url, 'ImageServer/')) {
     url = url + 'exportImage';
-  }
-  else {
+  } else {
     goog.asserts.fail('Unknown Rest Service', url);
   }
 
@@ -132,31 +127,17 @@ ol.source.TileArcGISRest.prototype.getRequestUrl_ =
 
 
 /**
- * @param {number} z Z.
- * @param {number} pixelRatio Pixel ratio.
- * @param {ol.proj.Projection} projection Projection.
- * @return {ol.Size} Size.
+ * @inheritDoc
  */
-ol.source.TileArcGISRest.prototype.getTilePixelSize =
-    function(z, pixelRatio, projection) {
-  var tileSize = goog.base(this, 'getTilePixelSize', z, pixelRatio, projection);
-  if (pixelRatio == 1) {
-    return tileSize;
-  } else {
-    return ol.size.scale(tileSize, pixelRatio, this.tmpSize);
-  }
+ol.source.TileArcGISRest.prototype.getTilePixelRatio = function(pixelRatio) {
+  return pixelRatio;
 };
 
 
 /**
- * @param {ol.TileCoord} tileCoord Tile coordinate.
- * @param {number} pixelRatio Pixel ratio.
- * @param {ol.proj.Projection} projection Projection.
- * @return {string|undefined} Tile URL.
- * @private
+ * @inheritDoc
  */
-ol.source.TileArcGISRest.prototype.tileUrlFunction_ =
-    function(tileCoord, pixelRatio, projection) {
+ol.source.TileArcGISRest.prototype.fixedTileUrlFunction = function(tileCoord, pixelRatio, projection) {
 
   var tileGrid = this.getTileGrid();
   if (!tileGrid) {
@@ -182,7 +163,7 @@ ol.source.TileArcGISRest.prototype.tileUrlFunction_ =
     'FORMAT': 'PNG32',
     'TRANSPARENT': true
   };
-  goog.object.extend(baseParams, this.params_);
+  ol.object.assign(baseParams, this.params_);
 
   return this.getRequestUrl_(tileCoord, tileSize, tileExtent,
       pixelRatio, projection, baseParams);
@@ -195,6 +176,6 @@ ol.source.TileArcGISRest.prototype.tileUrlFunction_ =
  * @api stable
  */
 ol.source.TileArcGISRest.prototype.updateParams = function(params) {
-  goog.object.extend(this.params_, params);
+  ol.object.assign(this.params_, params);
   this.changed();
 };

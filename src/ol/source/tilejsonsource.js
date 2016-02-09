@@ -8,15 +8,14 @@ goog.provide('ol.source.TileJSON');
 goog.provide('ol.tilejson');
 
 goog.require('goog.asserts');
-goog.require('goog.net.Jsonp');
 goog.require('ol.Attribution');
 goog.require('ol.TileRange');
 goog.require('ol.TileUrlFunction');
 goog.require('ol.extent');
+goog.require('ol.net');
 goog.require('ol.proj');
 goog.require('ol.source.State');
 goog.require('ol.source.TileImage');
-
 
 
 /**
@@ -40,9 +39,22 @@ ol.source.TileJSON = function(options) {
     wrapX: options.wrapX !== undefined ? options.wrapX : true
   });
 
-  var request = new goog.net.Jsonp(options.url);
-  request.send(undefined, goog.bind(this.handleTileJSONResponse, this),
-      goog.bind(this.handleTileJSONError, this));
+  if (options.jsonp) {
+    ol.net.jsonp(options.url, this.handleTileJSONResponse.bind(this),
+        this.handleTileJSONError.bind(this));
+  } else {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', options.url, true);
+    xhr.onload = function(e) {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        var response = /** @type {TileJSON} */(JSON.parse(xhr.responseText));
+        this.handleTileJSONResponse(response);
+      } else {
+        this.handleTileJSONError();
+      }
+    }.bind(this);
+    xhr.send();
+  }
 
 };
 goog.inherits(ol.source.TileJSON, ol.source.TileImage);

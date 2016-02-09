@@ -24,13 +24,13 @@ describe('ol.interaction.Translate', function() {
     source.addFeatures(features);
     var layer = new ol.layer.Vector({source: source});
     map = new ol.Map({
-            target: target,
-            layers: [layer],
-            view: new ol.View({
+      target: target,
+      layers: [layer],
+      view: new ol.View({
         projection: 'EPSG:4326',
         center: [0, 0],
         resolution: 1
-            })
+      })
     });
     map.once('postrender', function() {
       done();
@@ -56,12 +56,11 @@ describe('ol.interaction.Translate', function() {
     var position = goog.style.getClientPosition(viewport);
     var shiftKey = opt_shiftKey !== undefined ? opt_shiftKey : false;
     var event = new ol.MapBrowserPointerEvent(type, map,
-        new ol.pointer.PointerEvent(type,
-        new goog.events.BrowserEvent({
+        new ol.pointer.PointerEvent(type, {
           clientX: position.x + x + width / 2,
           clientY: position.y + y + height / 2,
           shiftKey: shiftKey
-        })));
+        }));
     map.handleMapBrowserEvent(event);
   }
 
@@ -110,8 +109,6 @@ describe('ol.interaction.Translate', function() {
 });
 
 goog.require('goog.dispose');
-goog.require('goog.events');
-goog.require('goog.events.BrowserEvent');
 goog.require('goog.style');
 goog.require('ol.Collection');
 goog.require('ol.Feature');

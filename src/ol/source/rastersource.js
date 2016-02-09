@@ -3,25 +3,24 @@ goog.provide('ol.source.RasterEvent');
 goog.provide('ol.source.RasterEventType');
 
 goog.require('goog.asserts');
-goog.require('goog.events');
-goog.require('goog.events.Event');
-goog.require('goog.events.EventType');
-goog.require('goog.object');
 goog.require('goog.vec.Mat4');
 goog.require('ol.ImageCanvas');
 goog.require('ol.TileQueue');
 goog.require('ol.dom');
+goog.require('ol.events');
+goog.require('ol.events.Event');
+goog.require('ol.events.EventType');
 goog.require('ol.ext.pixelworks');
 goog.require('ol.extent');
 goog.require('ol.layer.Image');
 goog.require('ol.layer.Tile');
+goog.require('ol.object');
 goog.require('ol.raster.OperationType');
 goog.require('ol.renderer.canvas.ImageLayer');
 goog.require('ol.renderer.canvas.TileLayer');
 goog.require('ol.source.Image');
 goog.require('ol.source.State');
 goog.require('ol.source.Tile');
-
 
 
 /**
@@ -63,8 +62,8 @@ ol.source.Raster = function(options) {
   this.renderers_ = ol.source.Raster.createRenderers_(options.sources);
 
   for (var r = 0, rr = this.renderers_.length; r < rr; ++r) {
-    goog.events.listen(this.renderers_[r], goog.events.EventType.CHANGE,
-        this.changed, false, this);
+    ol.events.listen(this.renderers_[r], ol.events.EventType.CHANGE,
+        this.changed, this);
   }
 
   /**
@@ -78,8 +77,10 @@ ol.source.Raster = function(options) {
    * @type {ol.TileQueue}
    */
   this.tileQueue_ = new ol.TileQueue(
-      function() { return 1; },
-      goog.bind(this.changed, this));
+      function() {
+        return 1;
+      },
+      this.changed.bind(this));
 
   var layerStatesArray = ol.source.Raster.getLayerStatesArray_(this.renderers_);
   var layerStates = {};
@@ -121,6 +122,7 @@ ol.source.Raster = function(options) {
     size: [0, 0],
     skippedFeatureUids: {},
     tileQueue: this.tileQueue_,
+    tileSourceCount: 0,
     time: Date.now(),
     usedTiles: {},
     viewState: /** @type {olx.ViewState} */ ({
@@ -167,14 +169,13 @@ ol.source.Raster.prototype.setOperation = function(operation, opt_lib) {
  * @return {olx.FrameState} The updated frame state.
  * @private
  */
-ol.source.Raster.prototype.updateFrameState_ =
-    function(extent, resolution, projection) {
+ol.source.Raster.prototype.updateFrameState_ = function(extent, resolution, projection) {
 
   var frameState = /** @type {olx.FrameState} */ (
-      goog.object.clone(this.frameState_));
+      ol.object.assign({}, this.frameState_));
 
   frameState.viewState = /** @type {olx.ViewState} */ (
-      goog.object.clone(frameState.viewState));
+      ol.object.assign({}, frameState.viewState));
 
   var center = ol.extent.getCenter(extent);
   var width = Math.round(ol.extent.getWidth(extent) / resolution);
@@ -212,8 +213,7 @@ ol.source.Raster.prototype.isDirty_ = function(extent, resolution) {
 /**
  * @inheritDoc
  */
-ol.source.Raster.prototype.getImage =
-    function(extent, resolution, pixelRatio, projection) {
+ol.source.Raster.prototype.getImage = function(extent, resolution, pixelRatio, projection) {
 
   if (!this.allSourcesReady_()) {
     return null;
@@ -313,8 +313,7 @@ ol.source.Raster.prototype.composeFrame_ = function(frameState, callback) {
  * @param {Object} data The user data.
  * @private
  */
-ol.source.Raster.prototype.onWorkerComplete_ =
-    function(frameState, callback, err, output, data) {
+ol.source.Raster.prototype.onWorkerComplete_ = function(frameState, callback, err, output, data) {
   if (err) {
     callback(err);
     return;
@@ -470,14 +469,13 @@ ol.source.Raster.createTileRenderer_ = function(source) {
 ol.source.Raster.RenderedState;
 
 
-
 /**
  * @classdesc
  * Events emitted by {@link ol.source.Raster} instances are instances of this
  * type.
  *
  * @constructor
- * @extends {goog.events.Event}
+ * @extends {ol.events.Event}
  * @implements {oli.source.RasterEvent}
  * @param {string} type Type.
  * @param {olx.FrameState} frameState The frame state.
@@ -509,7 +507,7 @@ ol.source.RasterEvent = function(type, frameState, data) {
   this.data = data;
 
 };
-goog.inherits(ol.source.RasterEvent, goog.events.Event);
+goog.inherits(ol.source.RasterEvent, ol.events.Event);
 
 
 /**

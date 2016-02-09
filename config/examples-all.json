@@ -18,13 +18,13 @@
       "externs/example.js",
       "externs/fastclick.js",
       "externs/geojson.js",
+      "externs/jspdf.js",
       "externs/jquery-1.9.js",
       "externs/proj4js.js",
       "externs/tilejson.js",
       "externs/topojson.js"
     ],
     "define": [
-      "goog.array.ASSUME_NATIVE_FUNCTIONS=true",
       "goog.dom.ASSUME_STANDARDS_MODE=true",
       "goog.json.USE_NATIVE_JSON=true",
       "goog.DEBUG=false"

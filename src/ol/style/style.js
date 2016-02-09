@@ -12,7 +12,6 @@ goog.require('ol.style.Image');
 goog.require('ol.style.Stroke');
 
 
-
 /**
  * @classdesc
  * Container for vector feature rendering styles. Any changes made to the style
@@ -160,7 +159,7 @@ ol.style.Style.prototype.getZIndex = function() {
 ol.style.Style.prototype.setGeometry = function(geometry) {
   if (goog.isFunction(geometry)) {
     this.geometryFunction_ = geometry;
-  } else if (goog.isString(geometry)) {
+  } else if (typeof geometry === 'string') {
     this.geometryFunction_ = function(feature) {
       var result = feature.get(geometry);
       if (result) {
