@@ -151,9 +151,9 @@ ol.source.ACT.prototype.getRequestUrl_ =
   }
   //need to ensur &cmd is at end
   var urlParams = goog.object.clone(params);
-  delete urlParams.cmd;
+  delete urlParams['cmd'];
 
-  return goog.uri.utils.appendParamsFromMap(url, urlParams) + '&cmd=' + params.cmd;
+  return goog.uri.utils.appendParamsFromMap(url, urlParams) + '&cmd=' + params['cmd'];
 };
 
 
