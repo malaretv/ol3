@@ -50,6 +50,7 @@
     "externs": [
       "externs/oli.js",
       "externs/olx.js",
+      "externs/geojson.js",
       "externs/proj4js.js"
     ],
     "define": [
