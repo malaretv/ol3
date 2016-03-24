@@ -147,9 +147,10 @@ ol.source.Tile.prototype.forEachLoadedTile = function(projection, z, tileRange, 
 
 
 /**
+ * @param {ol.proj.Projection} projection Projection.
  * @return {number} Gutter.
  */
-ol.source.Tile.prototype.getGutter = function() {
+ol.source.Tile.prototype.getGutter = function(projection) {
   return 0;
 };
 
@@ -286,6 +287,15 @@ ol.source.Tile.prototype.getTileCoordForTileUrlFunction = function(tileCoord, op
     tileCoord = ol.tilecoord.wrapX(tileCoord, tileGrid, projection);
   }
   return ol.tilecoord.withinExtentAndZ(tileCoord, tileGrid) ? tileCoord : null;
+};
+
+
+/**
+ * @inheritDoc
+ */
+ol.source.Tile.prototype.refresh = function() {
+  this.tileCache.clear();
+  this.changed();
 };
 
 
